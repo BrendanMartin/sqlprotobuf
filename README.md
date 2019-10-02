@@ -1,5 +1,5 @@
 # sqlprotobuf
-A very early stage SQL to Protobuf parser written in Python. 
+A very early stage SQL to Protobuf parser written in Python. Inspired by https://github.com/okdistribute/sql-protobuf.
 
 This does not cover many SQL/Protobuf idiosyncrasies, and is only meant to crudely turn CREATE TABLE statements into Protobuf Messages. 
 
