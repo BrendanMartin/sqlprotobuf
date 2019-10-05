@@ -2,8 +2,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from fire import Fire
 import sqlparse
+from fire import Fire
 
 pg_to_proto_type_mapping = {
     'smallint': 'int32',
@@ -51,7 +51,10 @@ def remove_ddl_comments(data):
     return re.sub('--\s+.*', '', data)
 
 
-def main(in_file, out_file=None, in_string=None):
+def main(in_file=None, out_file=None, in_string=None):
+    if not any([in_file, out_file, in_string]):
+        print("Must use at least one arg")
+        exit()
     if in_string:
         data = in_string
     else:
@@ -63,11 +66,11 @@ def main(in_file, out_file=None, in_string=None):
         with open(in_file_path.absolute(), 'r') as f:
             data = f.read()
 
-    data = remove_ddl_comments(data)
-
     out_file_path = None
     if out_file:
         out_file_path = Path(out_file)
+
+    data = remove_ddl_comments(data)
 
     result = {
         'syntax': 'proto3',
@@ -76,12 +79,11 @@ def main(in_file, out_file=None, in_string=None):
         'messages': []
     }
     statements = sqlparse.parse(data)
-
     for s in statements:
         match = re.search('.*CREATE\s+TABLE\s+(IF\s+NOT\s+EXISTS)?[\s+]?([\S|\`]+).*', str(s))
         if match:
             table_name = normalize(match.group(2))
-            table_name = table_name.split('.')[-1]
+            table_name = table_name.split('.')[-1].strip('"')
             table_name = ''.join([t.title() for t in table_name.split('_')])
             fields_match = re.search('\((.+)\);', str(s), flags=re.M | re.S | re.I)
             field_filters = ['constraint']
@@ -89,7 +91,7 @@ def main(in_file, out_file=None, in_string=None):
                 fields = fields_match.group(1).split(',')
                 fields = [f.strip() for f in fields if not any(filt in f.lower() for filt in field_filters)]
                 fields = [tuple(f.split()[:2]) for f in fields]
-                fields = [Field(name=name, type=pg_to_proto_type_mapping[type_]) for (name, type_) in fields]
+                fields = [Field(name=name.strip('"'), type=pg_to_proto_type_mapping[type_]) for (name, type_) in fields]
                 result['messages'].append(Message(name=table_name, fields=fields))
 
     stringed = stringify(result)
@@ -101,5 +103,5 @@ def main(in_file, out_file=None, in_string=None):
         print(stringed)
 
 
-if __name__ == '__main__':
+def cli():
     fire = Fire(main)
