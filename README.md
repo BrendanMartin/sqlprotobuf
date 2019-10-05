@@ -5,8 +5,9 @@ This does not cover many SQL/Protobuf idiosyncrasies, and is only meant to crude
 
 To use:
 
-1. Install requirements with
-`pip install -r requirements.txt`
+1. Build and install:
+`python setup.py build`
+`python setup.py install`
 
 2. Run from a terminal:
-`python sqlprotobuf --in-file=<your-schema.sql> --out-file=<your-schema.proto>`
+`sqlprotobuf --in-file=<your-schema.sql> --out-file=<your-schema.proto>`
