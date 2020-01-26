@@ -3,7 +3,7 @@ from pathlib import Path
 
 setuptools.setup(
         name='sqlprotobuf',
-        version='0.1',
+        version='0.2',
         author="Brendan Martin",
         description="Convert SQL CREATE TABLE statements to Protobuf Messages",
         long_description=open(Path(__file__).parent/"README.md", "r").read(),

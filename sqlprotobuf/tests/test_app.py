@@ -39,7 +39,8 @@ class MyTestCase(unittest.TestCase):
     def test_regex(self):
         s = """CREATE TABLE public.list (
                     id integer NOT NULL,
-                    title char(20)
+                    title char(20),
+                    other varchar(20)
                 );
                 """
         main(in_string=s)

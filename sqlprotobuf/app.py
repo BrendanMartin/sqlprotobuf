@@ -15,9 +15,14 @@ pg_to_proto_type_mapping = {
     'date':                    'string',
     'boolean':                 'bool',
     'timestamp':               'google.protobuf.Timestamp',
-    'text[]':                  'string',
-    re.compile('char\(\d+\)'): 'string'
+    'text[]':                  'repeated string',
+    re.compile('char\(\d+\)'): 'string',
+    'uuid':                    'string'
 }
+
+imports = [
+    'google/protobuf/timestamp.proto'
+]
 
 
 def get_mapped_type(t):
@@ -32,9 +37,9 @@ def get_mapped_type(t):
                     matches.append((k, t, v))
 
         if len(matches) > 1:
-            raise (f"Multiple column type matches found: {str(matches)}")
+            raise Exception(f"Multiple column type matches found: {str(matches)}")
         elif len(matches) == 0:
-            raise (f"Couldn't match column type: {k}")
+            raise Exception(f"Couldn't match a column type: {t}")
 
         return matches[0][-1]
 
@@ -59,6 +64,10 @@ def normalize(s):
 
 def stringify(result):
     final = ['syntax = "' + result["syntax"] + '";\n']
+
+    imps = result.pop('imports')
+    for im in imps:
+        final.append(f'import "{im}";\n')
 
     gop = result.pop('go_package')
     if gop:
@@ -101,6 +110,7 @@ def main(in_file=None, out_file=None, in_string=None, go_package=None):
 
     result = {
         'syntax':     'proto3',
+        'imports':    imports,
         'go_package': go_package,
         'enums':      [],
         'messages':   []
