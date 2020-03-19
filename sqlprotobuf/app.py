@@ -17,7 +17,8 @@ pg_to_proto_type_mapping = {
     'timestamp':               'google.protobuf.Timestamp',
     'text[]':                  'repeated string',
     re.compile('char\(\d+\)'): 'string',
-    'uuid':                    'string'
+    'uuid':                    'string',
+    'tsvector':                None
 }
 
 imports = [
@@ -128,7 +129,7 @@ def main(in_file=None, out_file=None, in_string=None, go_package=None):
                 fields = fields_match.group(1).strip().split(',\n')
                 fields = [f.strip() for f in fields if not any(filt in f.lower() for filt in field_filters)]
                 fields = [tuple(f.split()[:2]) for f in fields]
-                fields = [Field(name=name.strip('"'), type=get_mapped_type(type_)) for (name, type_) in fields]
+                fields = [Field(name=name.strip('"'), type=get_mapped_type(type_)) for (name, type_) in fields if get_mapped_type(type_)]
                 result['messages'].append(Message(name=table_name, fields=fields))
 
     stringed = stringify(result)
